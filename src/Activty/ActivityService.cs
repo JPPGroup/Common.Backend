@@ -21,26 +21,7 @@ namespace Jpp.Common.Backend.Activty
         public ActivityService(IAuthentication auth)
         {
             _auth = auth;
-            BindingOperations.CollectionRegistering += BindingOperations_CollectionRegistering;
         }
-
-        public MainViewModel()
-        {
-            Stocks = new ObservableCollection<Stock>();
-            
-
-            //BindingOperations.EnableCollectionSynchronization(Stocks, _stocksLock);
-        }
-
-        void BindingOperations_CollectionRegistering(object sender, CollectionRegisteringEventArgs e)
-        {
-            Debug.WriteLine("CollectionRegistering Event");
-            if (e.Collection == Stocks)
-            {
-                BindingOperations.EnableCollectionSynchronization(Stocks, _stocksLock);
-            }
-        }
-
 
         public async Task<ObservableCollection<Activity>> GetAllActivities()
         {
@@ -50,9 +31,10 @@ namespace Jpp.Common.Backend.Activty
                 var jsonString = await task.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<IEnumerable<Activity>>(jsonString);
 
-                ProcessActivities(result);
+                /*ProcessActivities(result);
 
-                return result;
+                return result;*/
+                return null;
             }
             catch (Exception e)
             {
