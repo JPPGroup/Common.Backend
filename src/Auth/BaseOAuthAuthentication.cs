@@ -69,44 +69,14 @@ namespace Jpp.Common.Backend.Auth
 
             if (escapedUri.StartsWith(@"https://localhost/signin-oidc"))
             {
-                var authResponse = new AuthorizeResponse(uri.ToString());
-                if (!string.IsNullOrWhiteSpace(authResponse.Code))
+                try
                 {
-                    HttpClient client = new HttpClient();
-
-                    //await Backend.Authenticate(authResponse.Code);
-                    try
-                    {
-                        var response = await client.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
-                        {
-                            Address = $"http://{Backend.BASE_URL}/connect/token",
-
-                            ClientId = "clientApp",
-                            ClientSecret = "secret",
-
-                            Code = authResponse.Code,
-                            RedirectUri = "https://localhost/signin-oidc",
-
-                        });
-
-                       if(response.IsError)
-                           throw new Exception(response.ErrorDescription);
-
-                        _accessToken = response.AccessToken;
-                        _idToken = response.IdentityToken;
-
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-
-                        Authenticated = true;
-                        OnAuthentication();
-
-                        return true;
-                    }
-                    catch (Exception e)
-                    {
-                        await _messenger.ShowCriticalError("Unable to communicate with server. Please try again later.");
-                        //TODO: Log this.
-                    }
+                    return await ProcessLogin(uri);
+                }
+                catch (Exception e)
+                {
+                    await _messenger.ShowCriticalError("Unable to communicate with server. Please try again later.");
+                    //TODO: Log this.
                 }
             }
 
@@ -114,6 +84,39 @@ namespace Jpp.Common.Backend.Auth
             {
                 //TODO: Do we need to clear cookies?
                 //LoginUrl = Backend.GetAuthenticationURL();
+            }
+
+            return false;
+        }
+
+        private async Task<bool> ProcessLogin(Uri uri)
+        {
+            var authResponse = new AuthorizeResponse(uri.ToString());
+            if (!string.IsNullOrWhiteSpace(authResponse.Code))
+            {
+                HttpClient client = new HttpClient();
+
+                var response = await client.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+                {
+                    Address = $"http://{Backend.BASE_URL}/connect/token",
+
+                    ClientId = "clientApp",
+                    ClientSecret = "secret",
+
+                    Code = authResponse.Code,
+                    RedirectUri = "https://localhost/signin-oidc",
+
+                });
+
+                if (response.IsError)
+                    throw new Exception(response.ErrorDescription);
+
+                _accessToken = response.AccessToken;
+                _idToken = response.IdentityToken;
+
+                Authenticated = true;
+                OnAuthentication();
+                return true;
             }
 
             return false;
