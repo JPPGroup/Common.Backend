@@ -63,31 +63,21 @@ namespace Jpp.Common.Backend.Projects
                 _projectModels = new ObservableCollection<ProjectModel>();
             }
 
-            //Try loading from local cache
-            //ProcessProjects(await LoadCache());
-
-            if (lastRefreshTime == null || DateTime.Now.Subtract(lastRefreshTime).TotalMinutes > REFRESH_MINUTES)
+            try
             {
-                try
+                var task = await _auth.GetAuthenticatedClient().GetAsync(PROJECT_ENDPOINT);
+                var jsonString = await task.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<IEnumerable<ProjectModel>>(jsonString);
+                _projectModels = new ObservableCollection<ProjectModel>(result);
+                foreach (ProjectModel pm in _projectModels)
                 {
-                    var task = await _auth.GetAuthenticatedClient().GetAsync( PROJECT_ENDPOINT);
-                    var jsonString = await task.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<IEnumerable<ProjectModel>>(jsonString);
-                    _projectModels = new ObservableCollection<ProjectModel>(result);
-                    foreach(ProjectModel pm in _projectModels)
-                    {
-                        pm.PropertyChanged += ProjectModelChanged;
-                    }
-
-                    //ProcessProjects(result);
-                    lastRefreshTime = DateTime.Now;
-                    //SaveCache();
+                    pm.PropertyChanged += ProjectModelChanged;
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
 
             return _projectModels;
@@ -111,40 +101,14 @@ namespace Jpp.Common.Backend.Projects
             {
                 if (_projectModels.Count(x => x.Id.Equals(pm.Id)) > 0)
                 {
-                    ProjectModel existing =_projectModels.First(x => x.Id == pm.Id);
-                    existing.Description = pm.Description;
-                    existing.Discipline = pm.Discipline;
-                    existing.Code = pm.Code;
-                    existing.Grouping = pm.Grouping;
-                    existing.Latitude = pm.Latitude;
-                    existing.Longitude = pm.Longitude;
-                    existing.Lead = pm.Lead;
-                    existing.Office = pm.Office;
-
-                    if (pm.Children != null && pm.Children.Count != 0)
-                    {
-                        existing.Children = pm.Children;
-                    }
+                    ProcessExistingProjectModel(pm);
                 }
                 else
                 {
-                    buffer.Add(pm);
+                    _projectModels.Add(pm);
                     if (pm.Children == null || pm.Children.Count == 0)
                     {
                         pm.CreateDefaultFolderStructure();
-                    }
-
-                    if (buffer.Count > BufferCount || DateTime.Now.Subtract(lastAdded).TotalSeconds > BufferTime)
-                    {
-
-                        /*foreach (ProjectModel projectModel in buffer)
-                        {
-                            //_projectModels.Add(projectModel);
-                            
-                        }*/
-                        //_projectModels.AddRange(buffer);
-                        buffer.Clear();
-                        lastAdded = DateTime.Now;
                     }
                 }
 
@@ -152,6 +116,24 @@ namespace Jpp.Common.Backend.Projects
                 {
                     projectItem.SetParent(pm);
                 }
+            }
+        }
+
+        private static void ProcessExistingProjectModel(ProjectModel pm)
+        {
+            ProjectModel existing = _projectModels.First(x => x.Id == pm.Id);
+            existing.Description = pm.Description;
+            existing.Discipline = pm.Discipline;
+            existing.Code = pm.Code;
+            existing.Grouping = pm.Grouping;
+            existing.Latitude = pm.Latitude;
+            existing.Longitude = pm.Longitude;
+            existing.Lead = pm.Lead;
+            existing.Office = pm.Office;
+
+            if (pm.Children != null && pm.Children.Count != 0)
+            {
+                existing.Children = pm.Children;
             }
         }
 
