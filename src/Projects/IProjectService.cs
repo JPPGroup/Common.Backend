@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Jpp.Common.Backend.Projects.Model;
 
 namespace Jpp.Common.Backend.Projects
 {
-    public interface IProjects
+    public interface IProjectService
     {
-        IEnumerable<DocumentTypes> GetDocumentTypes();
-
         Task<IEnumerable<ProjectModel>> GetAllProjects();
+
+        Task<ProjectModel> GetProject(Guid id);
     }
 }
