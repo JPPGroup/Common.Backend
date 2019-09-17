@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Jpp.Common.Backend.Auth;
 using Jpp.Common.Backend.Projects.Model;
@@ -12,6 +14,7 @@ namespace Jpp.Common.Backend.Projects
     public class ProjectService : IProjectService
     {
         public static readonly string PROJECT_ENDPOINT = $"http://{Backend.BASE_URL}/api/projects";
+        public static readonly string ITEM_ENDPOINT = $"http://{Backend.BASE_URL}/api/items";
 
         private IAuthentication _auth;
         private IStorageProvider _storage;
@@ -82,6 +85,17 @@ namespace Jpp.Common.Backend.Projects
             }
         }
 
+        public async Task<ItemModel> CreateItem(string name, string physicalname, ItemModel parent, string type)
+        {
+            ItemModel im = new ItemModel(name, physicalname, parent, type);
+            
+            var stringPayload = await Task.Run(() => JsonConvert.SerializeObject(im));
+            var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+
+            var task = await _auth.GetAuthenticatedClient().PostAsync($"{ITEM_ENDPOINT}", httpContent);
+            return im;
+        }
+        
         private async void ProjectModelChanged(object sender, PropertyChangedEventArgs e)
         {
             ProjectModel pm = sender as ProjectModel;
@@ -93,6 +107,11 @@ namespace Jpp.Common.Backend.Projects
             {
                 throw new NotImplementedException();
             }
+        }
+
+        public async Task DeleteItem(Guid id)
+        {
+            var task = await _auth.GetAuthenticatedClient().DeleteAsync($"{ITEM_ENDPOINT}/{id}");
         }
     }
 }

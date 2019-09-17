@@ -22,5 +22,17 @@ namespace Jpp.Common.Backend.Projects.Model
 
         [JsonIgnore]
         public List<ItemModel> Children { get; set; } = new List<ItemModel>();
+
+        private ItemModel()
+        { }
+
+        internal ItemModel(string name, string physicalname, ItemModel parent, string type)
+        {
+            Name = name;
+            PhysicalName = physicalname;
+            ProjectId = parent.ProjectId;
+            ParentItemId = parent.Id;
+            Type = type;
+        }
     }
 }
