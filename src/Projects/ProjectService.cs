@@ -19,12 +19,14 @@ namespace Jpp.Common.Backend.Projects
         private IAuthentication _auth;
         private IStorageProvider _storage;
         private IMessageProvider _message;
+        private IPhysicalFactory _physical;
 
-        public ProjectService(IAuthentication auth, IStorageProvider storage, IMessageProvider message)
+        public ProjectService(IAuthentication auth, IStorageProvider storage, IMessageProvider message, IPhysicalFactory physical)
         {
             _auth = auth;
             _storage = storage;
             _message = message;
+            _physical = physical;
         }
 
         private static ObservableCollection<ProjectModel> _projectModels;
@@ -75,6 +77,7 @@ namespace Jpp.Common.Backend.Projects
                     }
                 }
 
+                result.PhysicalProject = _physical.CreateProject(result, this);
                 result.BuildChildTree();
                 return result;
             }

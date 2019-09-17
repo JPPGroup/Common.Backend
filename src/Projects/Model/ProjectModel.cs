@@ -49,41 +49,24 @@ namespace Jpp.Common.Backend.Projects.Model
         [JsonProperty]
         IEnumerable<ItemModel> Items { get; set; }
 
+        [JsonIgnore]
+        public IPhysicalProject PhysicalProject { get; set; }
+
         public List<ItemModel> Children { get; private set; } = new List<ItemModel>();
 
         private bool _favourite;
-
-        //Needs custom implementation to handle lazy loading
-        public string Path
+        
+        public void BuildChildTree(ItemModel parent = null)
         {
-            get { return GetRootPath(); }
-        }
-
-        public ProjectModel() : base()
-        {
-            BaseFolders = new Dictionary<string, string>();
-            //BaseFolders.Add("Northampton", @"N:\Consulting\ProjectService");
-            BaseFolders.Add("Milton Keynes", @"M:\Consulting\ProjectService");
-            //BaseFolders.Add("Northampton", @"D:\Consulting\ProjectService");
-        }
-
-        private string GetRootPath()
-        {
-            string root;
-            if (Office != null && BaseFolders.ContainsKey(Office))
+            if (parent == null)
             {
-                root = BaseFolders[Office];
+                Children.Clear();
             }
             else
             {
-                root = BaseFolders["Milton Keynes"];
+                parent.Children.Clear();
             }
 
-            return $"{root}\\{Grouping}\\{Code} - {Name}";
-        }
-
-        public void BuildChildTree(ItemModel parent = null)
-        {
             var roots = Items.Where(i =>
             {
                 if (parent != null)
@@ -107,10 +90,62 @@ namespace Jpp.Common.Backend.Projects.Model
                 else
                 {
                     parent.Children.Add(itemModel);
+                    itemModel.Parent = parent;
                 }
+
+                itemModel.PhysicalItem = PhysicalProject?.ConvertLogicalItemToPhysical(itemModel);
 
                 BuildChildTree(itemModel);
             }
+        }
+
+        public ItemModel GetItemByPath(string fullpath)
+        {
+            string root = Name + "\\";
+            string rootPath;
+            if (fullpath.IndexOf(root) != -1)
+            {
+                rootPath = fullpath.Remove(0, fullpath.IndexOf(root) + root.Length);
+            }
+            else
+            {
+                rootPath = fullpath;
+            }
+
+            string[] Path = rootPath.Split('\\');
+
+            ItemModel foundItem = null;
+
+            for (int i = 0; i < Path.Length; i++)
+            {
+                try
+                {
+                    //TODO: Error handling
+                    if (foundItem == null)
+                    {
+                        foundItem = Children.First(item => item.Name.Equals(Path[i]));
+                    }
+                    else
+                    {
+                        foundItem = foundItem.Children.First(item =>
+                        {
+                            bool physicalNameMatch = false;
+
+                            if (item.PhysicalName != null)
+                                physicalNameMatch = item.PhysicalName.Equals(Path[i]);
+
+                            bool logicalNameMatch = item.Name.Equals(Path[i]);
+                            return physicalNameMatch || logicalNameMatch;
+                        });
+                    }
+                }
+                catch (InvalidOperationException e)
+                {
+                    return  null;
+                }
+            }
+
+            return foundItem;
         }
     }
 }
