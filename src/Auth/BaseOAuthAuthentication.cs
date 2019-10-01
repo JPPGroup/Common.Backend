@@ -18,10 +18,12 @@ namespace Jpp.Common.Backend.Auth
         private HttpClient _client;
 
         private IMessageProvider _messenger;
+        private readonly ErrorHandler _errorHandler;
 
-        public BaseOAuthAuthentication(IMessageProvider messenger)
+        public BaseOAuthAuthentication(IMessageProvider messenger, IErrorProvider errorProvider)
         {
             _messenger = messenger;
+            _errorHandler = new ErrorHandler(errorProvider);
         }
 
         public async Task Authenticate()
@@ -154,7 +156,7 @@ namespace Jpp.Common.Backend.Auth
 
             if (_client == null)
             {
-                _client = new HttpClient();
+                _client = new HttpClient(_errorHandler);
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             }
 
