@@ -20,10 +20,10 @@ namespace Jpp.Common.Backend.Auth
         private IMessageProvider _messenger;
         private readonly ErrorHandler _errorHandler;
 
-        public BaseOAuthAuthentication(IMessageProvider messenger, IErrorProvider errorProvider)
+        public BaseOAuthAuthentication(IMessageProvider messenger)
         {
             _messenger = messenger;
-            _errorHandler = new ErrorHandler(errorProvider);
+            _errorHandler = new ErrorHandler(messenger);
         }
 
         public async Task Authenticate()

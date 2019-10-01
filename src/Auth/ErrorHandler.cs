@@ -5,19 +5,18 @@ namespace Jpp.Common.Backend.Auth
 {
     internal class ErrorHandler : HttpClientHandler
     {
-        private readonly IErrorProvider _errorProvider;
+        private readonly IMessageProvider _messageProvider;
 
-        public ErrorHandler(IErrorProvider errorProvider)
+        public ErrorHandler(IMessageProvider messageProvider)
         {
-            _errorProvider = errorProvider;
+            _messageProvider = messageProvider;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
         {
             var response = await base.SendAsync(request, cancellationToken);
 
-            if (!response.IsSuccessStatusCode) 
-                _errorProvider.ShowError($"{request.RequestUri}\t{(int)response.StatusCode}\t{response.Headers.Date}");
+            if (!response.IsSuccessStatusCode) await _messageProvider.ShowError($"{request.RequestUri}\t{(int)response.StatusCode}\t{response.Headers.Date}");
             
             return response;
         }
