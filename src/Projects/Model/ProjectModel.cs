@@ -56,16 +56,19 @@ namespace Jpp.Common.Backend.Projects.Model
 
         private bool _favourite;
         
+        //TODO: Refactor into a root and child method
         public void BuildChildTree(ItemModel parent = null)
         {
+            List<ItemModel> container;
             if (parent == null)
             {
-                Children.Clear();
+                container = Children;
             }
             else
             {
-                parent.Children.Clear();
+                container = parent.Children;
             }
+            container.Clear();
 
             var roots = Items.Where(i =>
             {
@@ -83,20 +86,20 @@ namespace Jpp.Common.Backend.Projects.Model
 
             foreach (ItemModel itemModel in roots)
             {
-                if (parent == null)
-                {
-                    Children.Add(itemModel);
-                }
-                else
-                {
-                    parent.Children.Add(itemModel);
-                    itemModel.Parent = parent;
-                }
-
-                itemModel.PhysicalItem = PhysicalProject?.ConvertLogicalItemToPhysical(itemModel);
-
-                BuildChildTree(itemModel);
+                ProcessItemModel(parent, container, itemModel);
             }
+        }
+
+        private void ProcessItemModel(ItemModel parent, List<ItemModel> container, ItemModel itemModel)
+        {
+            if (parent != null)
+            {
+                itemModel.Parent = parent;
+            }
+            
+            container.Add(itemModel);
+            itemModel.PhysicalItem = PhysicalProject?.ConvertLogicalItemToPhysical(itemModel);
+            BuildChildTree(itemModel);
         }
 
         public ItemModel GetItemByPath(string fullpath)
@@ -112,10 +115,14 @@ namespace Jpp.Common.Backend.Projects.Model
                 rootPath = fullpath;
             }
 
-            string[] Path = rootPath.Split('\\');
+            ItemModel foundItem = ParsePathSegments(rootPath.Split('\\'));
 
+            return foundItem;
+        }
+
+        private ItemModel ParsePathSegments(string[] Path)
+        {
             ItemModel foundItem = null;
-
             for (int i = 0; i < Path.Length; i++)
             {
                 try
@@ -141,7 +148,7 @@ namespace Jpp.Common.Backend.Projects.Model
                 }
                 catch (InvalidOperationException e)
                 {
-                    return  null;
+                    return null;
                 }
             }
 

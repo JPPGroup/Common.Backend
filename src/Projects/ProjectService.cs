@@ -67,14 +67,7 @@ namespace Jpp.Common.Backend.Projects
                 var result = JsonConvert.DeserializeObject<ProjectModel>(jsonString);
                 if (!result.IsTemplateCurrent)
                 {
-                    if (await _message.ShowConfirmDialog("Project template is out of date. Would you like to update?"))
-                    {
-                        var update = await _auth.GetAuthenticatedClient().PutAsync($"{PROJECT_ENDPOINT}/{id}/updatetemplate", null);
-                        if (update.IsSuccessStatusCode)
-                        {
-                            return await GetProject(id);
-                        }
-                    }
+                    result = await UpdateModel(result);
                 }
 
                 result.PhysicalProject = _physical.CreateProject(result, this);
@@ -109,6 +102,26 @@ namespace Jpp.Common.Backend.Projects
             if (e.PropertyName.Equals(nameof(ProjectModel.Children)))
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        private async Task<ProjectModel> UpdateModel(ProjectModel projectModel)
+        {
+            if (await _message.ShowConfirmDialog("Project template is out of date. Would you like to update?"))
+            {
+                var update = await _auth.GetAuthenticatedClient().PutAsync($"{PROJECT_ENDPOINT}/{projectModel.Id}/updatetemplate", null);
+                if (update.IsSuccessStatusCode)
+                {
+                    return await GetProject(projectModel.Id);
+                }
+                else
+                {
+                    throw new ArgumentException("Update failed");
+                }
+            }
+            else
+            {
+                return projectModel;
             }
         }
 
