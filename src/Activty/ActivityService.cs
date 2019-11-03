@@ -16,7 +16,6 @@ namespace Jpp.Common.Backend.Activty
         private IAuthentication _auth;
 
         private ObservableCollection<Activity> _activities;
-        public object ActivityLock { get; set; }
 
         public ActivityService(IAuthentication auth)
         {
@@ -62,6 +61,11 @@ namespace Jpp.Common.Backend.Activty
         public void ProcessActivities()
         {
 
+        }
+
+        public Task<ObservableCollection<Activity>> GetActivitiesForEntity(Guid entityId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

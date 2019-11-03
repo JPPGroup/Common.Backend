@@ -10,6 +10,8 @@ namespace Jpp.Common.Backend.Activty
     {
         Task<ObservableCollection<Activity>> GetAllActivities();
 
+        Task<ObservableCollection<Activity>> GetActivitiesForEntity(Guid entityId);
+
         Task PushActivity(Activity activity);
     }
 }
