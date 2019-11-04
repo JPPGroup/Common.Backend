@@ -8,7 +8,6 @@
         /// <summary>
         /// Base domain for backend service
         /// </summary>
-        public const string BASE_URL = "group.cluster.jppuk.net";
-        //public const string BASE_URL = "10.0.2.2:52134";
+        public static string BASE_URL { get; set; } = "group.cluster.jppuk.net";
     }
 }
