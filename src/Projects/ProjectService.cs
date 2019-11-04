@@ -40,6 +40,7 @@ namespace Jpp.Common.Backend.Projects
 
             try
             {
+                //TODO: Review return result
                 var task = await _auth.GetAuthenticatedClient().GetAsync(PROJECT_ENDPOINT);
                 var jsonString = await task.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<IEnumerable<ProjectModel>>(jsonString);
@@ -62,6 +63,7 @@ namespace Jpp.Common.Backend.Projects
         {
             try
             {
+                //TODO: Review return result
                 var task = await _auth.GetAuthenticatedClient().GetAsync($"{PROJECT_ENDPOINT}/{id}");
                 var jsonString = await task.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<ProjectModel>(jsonString);
@@ -81,13 +83,13 @@ namespace Jpp.Common.Backend.Projects
             }
         }
 
-        public async Task<ItemModel> CreateItem(string name, string physicalname, ItemModel parent, string type)
+        public async Task<ItemModel> CreateItem(string name, string physicalName, ItemModel parent, string type)
         {
-            ItemModel im = new ItemModel(name, physicalname, parent, type);
+            ItemModel im = new ItemModel(name, physicalName, parent, type);
             
             var stringPayload = await Task.Run(() => JsonConvert.SerializeObject(im));
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-
+            //TODO: Review return result
             var task = await _auth.GetAuthenticatedClient().PostAsync($"{ITEM_ENDPOINT}", httpContent);
             return im;
         }
@@ -97,6 +99,7 @@ namespace Jpp.Common.Backend.Projects
             ProjectModel pm = sender as ProjectModel;
             if(e.PropertyName.Equals(nameof(ProjectModel.Favourite)))
             {
+                //TODO: Review return result
                 var task = await _auth.GetAuthenticatedClient().PutAsync(PROJECT_ENDPOINT + $"/{pm.Id}/Favourite", null);
             }
             if (e.PropertyName.Equals(nameof(ProjectModel.Children)))
@@ -109,6 +112,7 @@ namespace Jpp.Common.Backend.Projects
         {
             if (await _message.ShowConfirmDialog("Project template is out of date. Would you like to update?"))
             {
+                //TODO: Review return result
                 var update = await _auth.GetAuthenticatedClient().PutAsync($"{PROJECT_ENDPOINT}/{projectModel.Id}/updatetemplate", null);
                 if (update.IsSuccessStatusCode)
                 {
@@ -127,6 +131,7 @@ namespace Jpp.Common.Backend.Projects
 
         public async Task DeleteItem(Guid id)
         {
+            //TODO: Review return result
             var task = await _auth.GetAuthenticatedClient().DeleteAsync($"{ITEM_ENDPOINT}/{id}");
         }
     }

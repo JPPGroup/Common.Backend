@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using DocumentFormat.OpenXml.Office2013.PowerPoint;
 using Newtonsoft.Json;
 
 namespace Jpp.Common.Backend.Projects.Model
@@ -37,36 +35,42 @@ namespace Jpp.Common.Backend.Projects.Model
         private ItemModel()
         { }
 
-        internal ItemModel(string name, string physicalname, ItemModel parent, string type, bool localOnly)
+        //TODO: Review constructors
+        internal ItemModel(string name, string physicalName, ItemModel parent, string type, bool localOnly)
         {
+            if (parent == null)
+                throw new ArgumentNullException();
+
             Name = name;
-            PhysicalName = physicalname;
+            PhysicalName = physicalName;
             ProjectId = parent.ProjectId;
             ParentItemId = parent.Id;
             Type = type;
             LocalOnly = localOnly;
         }
 
-        public ItemModel(string name, string physicalname, ItemModel parent, string type)
+        //TODO: Review constructors
+        public ItemModel(string name, string physicalName, ItemModel parent, string type)
         {
             if(parent == null)
                 throw new ArgumentNullException();
 
             Name = name;
-            PhysicalName = physicalname;
+            PhysicalName = physicalName;
             ProjectId = parent.ProjectId;
             ParentItemId = parent.Id;
             Type = type;
             LocalOnly = true;
         }
 
-        public ItemModel(string name, string physicalname, ProjectModel parent, string type)
+        //TODO: Review constructors
+        public ItemModel(string name, string physicalName, ProjectModel parent, string type)
         {
             if (parent == null)
                 throw new ArgumentNullException();
 
             Name = name;
-            PhysicalName = physicalname;
+            PhysicalName = physicalName;
             ProjectId = parent.Id;
             Type = type;
             LocalOnly = true;            

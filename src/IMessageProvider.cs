@@ -27,8 +27,20 @@ namespace Jpp.Common.Backend
         /// <returns>Awaitable task</returns>
         Task ShowError(string message);
 
+        /// <summary>
+        /// Show non critical error dialog to user
+        /// </summary>
+        /// <param name="message">Message to be displayed</param>
+        /// <param name="title">Title of messagebox</param>
+        /// <returns>Awaitable task</returns>
         Task ShowMessage(string message, string title);
 
+        /// <summary>
+        /// Show confirmation dialog to the user
+        /// </summary>
+        /// <param name="message">Message to be displayed</param>
+        /// <param name="title">Title of messagebox</param>
+        /// <returns>Awaitable boolean indicating confirmation</returns>
         Task<bool> ShowConfirmDialog(string message, string title = "Confirm");
     }
 }

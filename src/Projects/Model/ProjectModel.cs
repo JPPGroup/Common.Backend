@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Jpp.Common.Backend.Projects.Model
 {
@@ -106,9 +103,9 @@ namespace Jpp.Common.Backend.Projects.Model
         {
             string root = Name + "\\";
             string rootPath;
-            if (fullpath.IndexOf(root) != -1)
+            if (fullpath.IndexOf(root, StringComparison.CurrentCultureIgnoreCase) != -1)
             {
-                rootPath = fullpath.Remove(0, fullpath.IndexOf(root) + root.Length);
+                rootPath = fullpath.Remove(0, fullpath.IndexOf(root, StringComparison.CurrentCultureIgnoreCase) + root.Length);
             }
             else
             {
@@ -120,17 +117,17 @@ namespace Jpp.Common.Backend.Projects.Model
             return foundItem;
         }
 
-        private ItemModel ParsePathSegments(string[] Path)
+        private ItemModel ParsePathSegments(string[] path)
         {
             ItemModel foundItem = null;
-            for (int i = 0; i < Path.Length; i++)
+            for (int i = 0; i < path.Length; i++)
             {
                 try
                 {
                     //TODO: Error handling
                     if (foundItem == null)
                     {
-                        foundItem = Children.First(item => item.Name.Equals(Path[i]));
+                        foundItem = Children.First(item => item.Name.Equals(path[i]));
                     }
                     else
                     {
@@ -139,9 +136,9 @@ namespace Jpp.Common.Backend.Projects.Model
                             bool physicalNameMatch = false;
 
                             if (item.PhysicalName != null)
-                                physicalNameMatch = item.PhysicalName.Equals(Path[i]);
+                                physicalNameMatch = item.PhysicalName.Equals(path[i]);
 
-                            bool logicalNameMatch = item.Name.Equals(Path[i]);
+                            bool logicalNameMatch = item.Name.Equals(path[i]);
                             return physicalNameMatch || logicalNameMatch;
                         });
                     }
