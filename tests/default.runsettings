@@ -1,7 +1,10 @@
 <RunSettings>
+  <RunConfiguration>
+    <TargetFrameworkVersion>.NETCoreApp,Version=v3.0</TargetFrameworkVersion>
+  </RunConfiguration>
   <TestRunParameters>
     <Parameter name="BaseUrl" value="undefined" />
     <Parameter name="ClientId" value="undefined" />
-	<Parameter name="ClientSecret" value="undefined" />
+	  <Parameter name="ClientSecret" value="undefined" />
   </TestRunParameters>
 </RunSettings>

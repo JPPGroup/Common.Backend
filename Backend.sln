@@ -5,9 +5,14 @@ VisualStudioVersion = 16.0.29201.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend", "src\Backend.csproj", "{62F27850-EE20-407E-A839-F8FBF34B8DE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.UnitTests", "tests\Backend.Tests\Backend.UnitTests.csproj", "{933A25FE-3CA8-4127-9D7C-F79D41AD860B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.UnitTests", "tests\Backend.Tests\Backend.UnitTests.csproj", "{933A25FE-3CA8-4127-9D7C-F79D41AD860B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.IntegrationTests", "tests\Backend.IntegrationTests\Backend.IntegrationTests.csproj", "{151D9A7A-4FDA-484A-8DCF-DABCFD1E186D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.IntegrationTests", "tests\Backend.IntegrationTests\Backend.IntegrationTests.csproj", "{151D9A7A-4FDA-484A-8DCF-DABCFD1E186D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0A42587-20E3-482D-A39A-A7D06CFD3B16}"
+	ProjectSection(SolutionItems) = preProject
+		tests\default.runsettings = tests\default.runsettings
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

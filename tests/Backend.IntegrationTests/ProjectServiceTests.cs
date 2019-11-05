@@ -3,6 +3,7 @@ using Jpp.Common.Backend.Projects;
 using Jpp.Common.Backend.Projects.Model;
 using NUnit.Framework;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Jpp.Common.Backend.IntegrationTests
 {
@@ -22,7 +23,7 @@ namespace Jpp.Common.Backend.IntegrationTests
         }
 
         [Test]
-        public async void GetAllProjectsTest()
+        public async Task GetAllProjectsTest()
         {
             ProjectService projectService = new ProjectService(_auth, _message, _physicalFactory);
             var result = await projectService.GetAllProjects();
