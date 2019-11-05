@@ -20,12 +20,13 @@ namespace Jpp.Common.Backend.IntegrationTests
             _message = new MessageProviderFake();
             _physicalFactory = new PhysicalFactoryFake();
             _auth = new UnattendedAuthentication(_message, TestContext.Parameters["ClientId"], TestContext.Parameters["ClientSecret"]);
+            _auth.Authenticate();
         }
 
         [Test]
         public async Task GetAllProjectsTest()
         {
-            ProjectService projectService = new ProjectService(_auth, _message, _physicalFactory);
+            ProjectService projectService = new ProjectService(_auth, _message, _physicalFactory);            
             var result = await projectService.GetAllProjects();
             Assert.IsTrue(result.Count() > 0);
         }
