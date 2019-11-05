@@ -15,12 +15,12 @@ namespace Jpp.Common.Backend.IntegrationTests
         IPhysicalFactory _physicalFactory;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _message = new MessageProviderFake();
             _physicalFactory = new PhysicalFactoryFake();
-            _auth = new UnattendedAuthentication(_message, TestContext.Parameters["ClientId"], TestContext.Parameters["ClientSecret"]);
-            _auth.Authenticate();
+            _auth = new UnattendedAuthentication(_message, TestContext.Parameters["ClientId"], TestContext.Parameters["ClientSecret"], TestContext.Parameters["Username"], TestContext.Parameters["Password"]);
+            await _auth.Authenticate();
         }
 
         [Test]

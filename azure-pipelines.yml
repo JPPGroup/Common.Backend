@@ -36,8 +36,10 @@ steps:
     runSettingsFile: 'tests\default.runsettings'
     overrideTestrunParameters: >
       -BaseUrl group.cluster.jppuk.net
-      -ClientId testaccount
+      -ClientId testclient
       -ClientSecret $(testsecret)
+      -Username $(testusername)
+      -Password $(testpassword)
     runInParallel: True
     codeCoverageEnabled: True
 

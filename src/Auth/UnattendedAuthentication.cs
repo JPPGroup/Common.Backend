@@ -1,5 +1,6 @@
 ﻿using IdentityModel.Client;
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Jpp.Common.Backend.Auth
         public event EventHandler AuthenticationChanged;
         string _clientId, _clientSecret, _accessToken;
 
-        public UnattendedAuthentication(IMessageProvider messenger, string clientId, string clientSecret)
+        public UnattendedAuthentication(IMessageProvider messenger, string clientId, string clientSecret, string username, string password)
         {
             _errorHandler = new ErrorHandler(messenger);
             _messenger = messenger;
@@ -27,19 +28,36 @@ namespace Jpp.Common.Backend.Auth
         public async Task Authenticate()
         {
             HttpClient client = new HttpClient();
-            var disco = await client.GetDiscoveryDocumentAsync($"http://{Backend.BASE_URL}");
-            var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+            //TODO: Switch back to using discovery
+            //var disco = await client.GetDiscoveryDocumentAsync($"http://{Backend.BASE_URL}");
+            var response = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
             {
-                Address = disco.TokenEndpoint,
+                Address = $"http://{Backend.BASE_URL}/connect/token", //disco.TokenEndpoint,
                 ClientId = _clientId,
-                ClientSecret = _clientSecret
+                ClientSecret = _clientSecret,
+                UserName = "michael.liddiard@jppuk.net",
+                Password = "Regit-340"
             });
 
             if (response.IsError) throw new Exception(response.Error);
 
-            var token = response.AccessToken;
+            _accessToken = response.AccessToken;            
+
             Authenticated = true;
             await OnAuthentication();
+
+            var userresponse = await GetAuthenticatedClient().GetUserInfoAsync(new UserInfoRequest
+            {
+                Address = $"http://{Backend.BASE_URL}/connect/userinfo",
+                Token = _accessToken
+            });
+
+            User result = new User()
+            {
+                Username = userresponse.Claims.First(c => c.Type == "preferred_username").Value,
+                Name = userresponse.Claims.First(c => c.Type == "name").Value,
+                UserId = userresponse.Claims.First(c => c.Type == "sub").Value
+            };
         }
 
         public Task Expire()
