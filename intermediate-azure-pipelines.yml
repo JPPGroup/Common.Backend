@@ -2,11 +2,12 @@
 # Build and run tests for .NET Desktop or Windows classic desktop solutions.
 # Add steps that publish symbols, save build artifacts, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
-name: $(common-backend)$(rev:.r)
 
 trigger:
   branches:
     include:
+      - '*'
+    exclude:
       - master
 
 pool:
@@ -23,8 +24,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '**/*.csproj'
-    arguments: '/p:Configuration=$(BuildConfiguration) /p:PackageVersion=$(Build.BuildNumber)'
+    projects: '**/*.csproj'    
     
 - task: VSTest@2
   inputs:
@@ -44,15 +44,4 @@ steps:
       -Password $(testpassword)
     runInParallel: True
     codeCoverageEnabled: True
-
-- task: CopyFiles@2
-  inputs:
-    Contents: '**/*.nupkg'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
 
