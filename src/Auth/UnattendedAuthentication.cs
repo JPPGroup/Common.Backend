@@ -10,15 +10,27 @@ namespace Jpp.Common.Backend.Auth
     public class UnattendedAuthentication : IAuthentication
     {
         public bool Authenticated { get; set; } = false;
+
         HttpClient _client;
         private readonly ErrorHandler _errorHandler;
         private IMessageProvider _messenger;
-
         public event EventHandler AuthenticationChanged;
         string _clientId, _clientSecret, _accessToken;
 
+        /// <summary>
+        /// Create new unattended authentication service
+        /// WARNING - This flow is inherently risky and should not be used in a production environment
+        /// </summary>
+        /// <param name="messenger">Messenger service to be used</param>
+        /// <param name="clientId">Client id to be passed to backend</param>
+        /// <param name="clientSecret">Client secret to be passed to backend</param>
+        /// <param name="username">Username of user</param>
+        /// <param name="password">Password of user</param>
         public UnattendedAuthentication(IMessageProvider messenger, string clientId, string clientSecret, string username, string password)
         {
+            if(!Backend.UNATTENDED_AUTH_ENABLED)
+                throw  new InvalidOperationException("Unattended authentication requires enabling via Backend class prior to creating.");
+
             _errorHandler = new ErrorHandler(messenger);
             _messenger = messenger;
             _clientId = clientId;
@@ -45,19 +57,6 @@ namespace Jpp.Common.Backend.Auth
 
             Authenticated = true;
             await OnAuthentication();
-
-            var userresponse = await GetAuthenticatedClient().GetUserInfoAsync(new UserInfoRequest
-            {
-                Address = $"http://{Backend.BASE_URL}/connect/userinfo",
-                Token = _accessToken
-            });
-
-            User result = new User()
-            {
-                Username = userresponse.Claims.First(c => c.Type == "preferred_username").Value,
-                Name = userresponse.Claims.First(c => c.Type == "name").Value,
-                UserId = userresponse.Claims.First(c => c.Type == "sub").Value
-            };
         }
 
         public Task Expire()
@@ -79,9 +78,22 @@ namespace Jpp.Common.Backend.Auth
             return _client;
         }
 
-        public Task<User> GetUserProfile()
+        public async Task<User> GetUserProfile()
         {
-            throw new NotImplementedException();
+            var userresponse = await GetAuthenticatedClient().GetUserInfoAsync(new UserInfoRequest
+            {
+                Address = $"http://{Backend.BASE_URL}/connect/userinfo",
+                Token = _accessToken
+            });
+
+            User result = new User()
+            {
+                Username = userresponse.Claims.First(c => c.Type == "preferred_username").Value,
+                Name = userresponse.Claims.First(c => c.Type == "name").Value,
+                UserId = userresponse.Claims.First(c => c.Type == "sub").Value
+            };
+
+            return result;
         }
 
         protected async Task OnAuthentication()

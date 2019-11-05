@@ -1,6 +1,5 @@
 ﻿using Jpp.Common.Backend.Projects;
 using Jpp.Common.Backend.Projects.Model;
-using System;
 
 namespace Jpp.Common.Backend.IntegrationTests
 {

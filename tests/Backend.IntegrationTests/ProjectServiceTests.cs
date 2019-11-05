@@ -28,7 +28,7 @@ namespace Jpp.Common.Backend.IntegrationTests
         {
             ProjectService projectService = new ProjectService(_auth, _message, _physicalFactory);            
             var result = await projectService.GetAllProjects();
-            Assert.IsTrue(result.Count() > 0);
+            Assert.IsTrue(result.Any());
         }
     }
 }
