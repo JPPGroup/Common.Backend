@@ -1,0 +1,7 @@
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name="BaseUrl" value="undefined" />
+    <Parameter name="ClientId" value="undefined" />
+	<Parameter name="ClientSecret" value="undefined" />
+  </TestRunParameters>
+</RunSettings>

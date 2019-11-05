@@ -8,7 +8,7 @@ trigger:
 - '*'
 
 pool:
-  vmImage: 'Ubuntu-16.04'
+  vmImage: 'windows-latest'
 
 variables:  
 - group: versions
@@ -23,6 +23,22 @@ steps:
     command: 'build'
     projects: '**/*.csproj'
     arguments: '/p:Configuration=$(BuildConfiguration) /p:PackageVersion=$(Build.BuildNumber)'
+    
+- task: VSTest@2
+  inputs:
+    testSelector: 'testAssemblies' # Options: testAssemblies, testPlan, testRun
+    testAssemblyVer2: |
+      **\*Test*.dll
+      !**\*TestAdapter.dll
+      !**\obj\** 
+    searchFolder: '$(System.DefaultWorkingDirectory)' 
+    runSettingsFile: 'tests\default.runsettings'
+    overrideTestrunParameters:
+      BaseUrl: 'gorup.cluster.jppuk.net'
+      ClientId: 'testaccount'
+      ClientSecret: $(testsecret)
+    runInParallel: True
+    codeCoverageEnabled: True
 
 - task: CopyFiles@2
   inputs:
