@@ -1,21 +1,13 @@
 ﻿using IdentityModel.Client;
 using System;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Jpp.Common.Backend.Auth
 {
-    public class UnattendedAuthentication : IAuthentication
+    public class UnattendedAuthentication : BaseOAuthAuthentication
     {
-        public bool Authenticated { get; set; } = false;
-
-        HttpClient _client;
-        private readonly ErrorHandler _errorHandler;
-        private IMessageProvider _messenger;
-        public event EventHandler AuthenticationChanged;
-        string _clientId, _clientSecret, _accessToken;
+        protected string _clientId, _clientSecret, _username, _password;
 
         /// <summary>
         /// Create new unattended authentication service
@@ -35,9 +27,11 @@ namespace Jpp.Common.Backend.Auth
             _messenger = messenger;
             _clientId = clientId;
             _clientSecret = clientSecret;
+            _username = username;
+            _password = password;
         }
 
-        public async Task Authenticate()
+        public override async Task Authenticate()
         {
             HttpClient client = new HttpClient();
             //TODO: Switch back to using discovery
@@ -47,8 +41,8 @@ namespace Jpp.Common.Backend.Auth
                 Address = $"http://{Backend.BASE_URL}/connect/token", //disco.TokenEndpoint,
                 ClientId = _clientId,
                 ClientSecret = _clientSecret,
-                UserName = "michael.liddiard@jppuk.net",
-                Password = "Regit-340"
+                UserName = _username,
+                Password = _password
             });
 
             if (response.IsError) throw new Exception(response.Error);
@@ -59,50 +53,9 @@ namespace Jpp.Common.Backend.Auth
             await OnAuthentication();
         }
 
-        public Task Expire()
+        public override Task Expire()
         {
             throw new NotImplementedException();
-        }
-
-        public HttpClient GetAuthenticatedClient()
-        {
-            if (!Authenticated)
-                throw new NotAuthenticatedException();
-
-            if (_client == null)
-            {
-                _client = new HttpClient(_errorHandler);
-                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-            }
-
-            return _client;
-        }
-
-        public async Task<User> GetUserProfile()
-        {
-            var userresponse = await GetAuthenticatedClient().GetUserInfoAsync(new UserInfoRequest
-            {
-                Address = $"http://{Backend.BASE_URL}/connect/userinfo",
-                Token = _accessToken
-            });
-
-            User result = new User()
-            {
-                Username = userresponse.Claims.First(c => c.Type == "preferred_username").Value,
-                Name = userresponse.Claims.First(c => c.Type == "name").Value,
-                UserId = userresponse.Claims.First(c => c.Type == "sub").Value
-            };
-
-            return result;
-        }
-
-        protected async Task OnAuthentication()
-        {
-            //await LoadUser();
-            _client = null;
-
-            EventHandler handler = AuthenticationChanged;
-            if (null != handler) handler(null, EventArgs.Empty);
         }
     }
 }

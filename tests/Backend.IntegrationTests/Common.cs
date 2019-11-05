@@ -9,6 +9,7 @@ namespace Jpp.Common.Backend.IntegrationTests
         public void Setup()
         {
             Backend.BASE_URL = TestContext.Parameters["BaseUrl"];
+            Backend.UNATTENDED_AUTH_ENABLED = true;
         }
     }
 }
