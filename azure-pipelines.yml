@@ -33,10 +33,10 @@ steps:
       !**\obj\** 
     searchFolder: '$(System.DefaultWorkingDirectory)' 
     runSettingsFile: 'tests\default.runsettings'
-    overrideTestrunParameters:
-      BaseUrl: 'gorup.cluster.jppuk.net'
-      ClientId: 'testaccount'
-      ClientSecret: $(testsecret)
+    overrideTestrunParameters: >
+      -BaseUrl group.cluster.jppuk.net
+      -ClientId testaccount
+      -ClientSecret $(testsecret)
     runInParallel: True
     codeCoverageEnabled: True
 
