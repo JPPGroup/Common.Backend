@@ -96,7 +96,7 @@ namespace Jpp.Common.Backend.Projects
         
         private async void ProjectModelChanged(object sender, PropertyChangedEventArgs e)
         {
-            ProjectModel pm = sender as ProjectModel;
+            ProjectModel pm = (ProjectModel) sender;
             if(e.PropertyName.Equals(nameof(ProjectModel.Favourite)))
             {
                 //TODO: Review return result
