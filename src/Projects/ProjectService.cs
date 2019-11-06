@@ -17,14 +17,12 @@ namespace Jpp.Common.Backend.Projects
         public static readonly string ITEM_ENDPOINT = $"http://{Backend.BASE_URL}/api/items";
 
         private IAuthentication _auth;
-        private IStorageProvider _storage;
         private IMessageProvider _message;
         private IPhysicalFactory _physical;
 
-        public ProjectService(IAuthentication auth, IStorageProvider storage, IMessageProvider message, IPhysicalFactory physical)
+        public ProjectService(IAuthentication auth, IMessageProvider message, IPhysicalFactory physical)
         {
             _auth = auth;
-            _storage = storage;
             _message = message;
             _physical = physical;
         }

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 
@@ -11,129 +9,45 @@ namespace Jpp.Common.Backend.Auth
 {
     public abstract class BaseOAuthAuthentication : IAuthentication
     {
-        public bool Authenticated { get; private set; }
+        internal ErrorHandler _errorHandler;
+        protected IMessageProvider _messenger;
 
-        private string _accessToken;
-        private string _idToken;
-        private HttpClient _client;
+        public bool Authenticated { get; set; } = false;
+        public event EventHandler AuthenticationChanged;
 
-        private IMessageProvider _messenger;
-        private readonly ErrorHandler _errorHandler;
+        protected HttpClient _client;
+        protected string _accessToken;
 
-        public BaseOAuthAuthentication(IMessageProvider messenger)
+        public abstract Task Authenticate();
+
+        public abstract Task Expire();
+
+        protected BaseOAuthAuthentication(IMessageProvider messenger)
         {
             _messenger = messenger;
             _errorHandler = new ErrorHandler(messenger);
         }
 
-        public async Task Authenticate()
+        public HttpClient GetAuthenticatedClient()
         {
-            AuthenticationPrompt();
-        }
+            if (!Authenticated)
+                throw new NotAuthenticatedException();
 
-        public async Task Expire()
-        {
-            ExpirePrompt();
-        }
-
-        public abstract void AuthenticationPrompt();
-        public abstract void ExpirePrompt();
-
-        protected string GetAuthenticationURL()
-        {
-            var ru = new RequestUrl($"http://{Backend.BASE_URL}/connect/authorize");
-
-            var url = ru.CreateAuthorizeUrl(
-                clientId: "clientApp",
-                responseType: "code id_token",
-                redirectUri: "https://localhost/signin-oidc",
-                nonce: "xyz",
-                scope: "openid offline_access profile resourceApi");
-
-            return url;
-        }
-
-        protected string GetExpireURL()
-        {
-            var ru = new RequestUrl($"http://{Backend.BASE_URL}/connect/authorize");
-            var url = ru.CreateEndSessionUrl(idTokenHint: _idToken);
-            return url;
-        }
-
-        /// <summary>
-        /// Determine if current URL is part of flow
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <returns>Return true when the current URL is the end of a flow</returns>
-        public async Task<bool> EvaluateURL(Uri uri)
-        {
-            var escapedUri = System.Net.WebUtility.UrlDecode(uri.ToString());
-
-            if (escapedUri.StartsWith(@"https://localhost/signin-oidc"))
+            if (_client == null)
             {
-                try
-                {
-                    return await ProcessLogin(uri);
-                }
-                catch (Exception e)
-                {
-                    await _messenger.ShowCriticalError("Unable to communicate with server. Please try again later.");
-                    //TODO: Log this.
-                }
+                _client = new HttpClient(_errorHandler);
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             }
 
-            if (escapedUri.StartsWith(@"http://" + Backend.BASE_URL + @"/Identity/Account/Logout"))
-            {
-                //TODO: Do we need to clear cookies?
-                //LoginUrl = Backend.GetAuthenticationURL();
-            }
-
-            return false;
+            return _client;
         }
-
-        private async Task<bool> ProcessLogin(Uri uri)
-        {
-            var authResponse = new AuthorizeResponse(uri.ToString());
-            if (!string.IsNullOrWhiteSpace(authResponse.Code))
-            {
-                HttpClient client = new HttpClient();
-
-                var response = await client.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
-                {
-                    Address = $"http://{Backend.BASE_URL}/connect/token",
-
-                    ClientId = "clientApp",
-                    ClientSecret = "secret",
-
-                    Code = authResponse.Code,
-                    RedirectUri = "https://localhost/signin-oidc",
-
-                });
-
-                if (response.IsError)
-                    throw new Exception(response.ErrorDescription);
-
-                _accessToken = response.AccessToken;
-                _idToken = response.IdentityToken;
-
-                Authenticated = true;
-                OnAuthentication();
-                return true;
-            }
-
-            return false;
-        }
-
-        public event EventHandler AuthenticationChanged;
 
         public async Task<User> GetUserProfile()
         {
             if (!Authenticated)
-              throw new NotAuthenticatedException();
+                throw new NotAuthenticatedException();
 
-            HttpClient _client = GetAuthenticatedClient();
-
-            var userresponse = await _client.GetUserInfoAsync(new UserInfoRequest
+            var userresponse = await GetAuthenticatedClient().GetUserInfoAsync(new UserInfoRequest
             {
                 Address = $"http://{Backend.BASE_URL}/connect/userinfo",
                 Token = _accessToken
@@ -147,20 +61,6 @@ namespace Jpp.Common.Backend.Auth
             };
 
             return result;
-        }
-
-        public HttpClient GetAuthenticatedClient()
-        {
-            if(!Authenticated)
-                throw new NotAuthenticatedException();
-
-            if (_client == null)
-            {
-                _client = new HttpClient(_errorHandler);
-                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-            }
-
-            return _client;
         }
 
         protected async Task OnAuthentication()
