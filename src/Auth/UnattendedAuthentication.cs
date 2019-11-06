@@ -18,13 +18,11 @@ namespace Jpp.Common.Backend.Auth
         /// <param name="clientSecret">Client secret to be passed to backend</param>
         /// <param name="username">Username of user</param>
         /// <param name="password">Password of user</param>
-        public UnattendedAuthentication(IMessageProvider messenger, string clientId, string clientSecret, string username, string password)
+        public UnattendedAuthentication(IMessageProvider messenger, string clientId, string clientSecret, string username, string password) : base(messenger)
         {
             if(!Backend.UNATTENDED_AUTH_ENABLED)
                 throw  new InvalidOperationException("Unattended authentication requires enabling via Backend class prior to creating.");
 
-            _errorHandler = new ErrorHandler(messenger);
-            _messenger = messenger;
             _clientId = clientId;
             _clientSecret = clientSecret;
             _username = username;
