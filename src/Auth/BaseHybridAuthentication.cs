@@ -8,11 +8,9 @@ namespace Jpp.Common.Backend.Auth
     public abstract class BaseHybridAuthentication : BaseOAuthAuthentication
     {
         private string _idToken;
-        
-        public BaseHybridAuthentication(IMessageProvider messenger)
+
+        protected BaseHybridAuthentication(IMessageProvider messenger) : base(messenger)
         {
-            _messenger = messenger;
-            _errorHandler = new ErrorHandler(messenger);
         }
 
         public override async Task Authenticate()

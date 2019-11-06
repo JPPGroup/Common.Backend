@@ -22,6 +22,12 @@ namespace Jpp.Common.Backend.Auth
 
         public abstract Task Expire();
 
+        protected BaseOAuthAuthentication(IMessageProvider messenger)
+        {
+            _messenger = messenger;
+            _errorHandler = new ErrorHandler(messenger);
+        }
+
         public HttpClient GetAuthenticatedClient()
         {
             if (!Authenticated)
