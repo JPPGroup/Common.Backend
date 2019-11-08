@@ -8,9 +8,9 @@ namespace Jpp.Common.Backend.Activty
 {
     public interface IActivityService
     {
-        Task<ObservableCollection<Activity>> GetAllActivities();
+        Task<ActivityStream> GetAllActivities();
 
-        Task<ObservableCollection<Activity>> GetActivitiesForEntity(Guid entityId);
+        Task<ActivityStream> GetActivitiesForEntity(Guid entityId);
 
         Task PushActivity(Activity activity);
     }
