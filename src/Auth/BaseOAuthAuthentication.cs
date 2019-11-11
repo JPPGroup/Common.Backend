@@ -9,7 +9,7 @@ namespace Jpp.Common.Backend.Auth
 {
     public abstract class BaseOAuthAuthentication : IAuthentication
     {
-        internal ErrorHandler _errorHandler;
+        internal HttpMessageHandler _messageHandler;
         protected IMessageProvider _messenger;
 
         public bool Authenticated { get; set; } = false;
@@ -25,7 +25,12 @@ namespace Jpp.Common.Backend.Auth
         protected BaseOAuthAuthentication(IMessageProvider messenger)
         {
             _messenger = messenger;
-            _errorHandler = new ErrorHandler(messenger);
+            _messageHandler = new ErrorHandler(messenger);
+        }
+
+        internal BaseOAuthAuthentication(HttpMessageHandler handler)
+        {            
+            _messageHandler = handler;
         }
 
         public HttpClient GetAuthenticatedClient()
@@ -35,7 +40,7 @@ namespace Jpp.Common.Backend.Auth
 
             if (_client == null)
             {
-                _client = new HttpClient(_errorHandler);
+                _client = new HttpClient(_messageHandler);
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             }
 
