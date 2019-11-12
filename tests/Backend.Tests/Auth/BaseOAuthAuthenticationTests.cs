@@ -23,24 +23,10 @@ namespace Jpp.Common.Backend.UnitTests.Auth
         public async Task OnAuthentication_Called()
         {
             var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-            handlerMock
-                .Protected()
-                .Setup<Task<HttpResponseMessage>>(
-                    "SendAsync",
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>()
-                )
-                .ReturnsAsync(new HttpResponseMessage()
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent("[{'id':1,'value':'1'}]"),
-                })
-                .Verifiable();
-
             bool eventFired = false;
 
             IAuthentication auth = new BaseOAuthAuthenticationStub(handlerMock.Object);
-            auth.AuthenticationChanged += new EventHandler(delegate (Object o, EventArgs a) { eventFired = true; });
+            auth.AuthenticationChanged += delegate { eventFired = true; };
             await auth.Authenticate();
 
             Assert.IsTrue(eventFired);
@@ -67,6 +53,8 @@ namespace Jpp.Common.Backend.UnitTests.Auth
             IAuthentication auth = new BaseOAuthAuthenticationStub(handlerMock.Object);
             await auth.Authenticate();
             User profile = await auth.GetUserProfile();
+            
+            handlerMock.Verify();
 
             Assert.Multiple(() =>
             {
@@ -74,6 +62,31 @@ namespace Jpp.Common.Backend.UnitTests.Auth
                 StringAssert.AreEqualIgnoringCase("248289761001", profile.UserId, "Invalid UserId");
                 StringAssert.AreEqualIgnoringCase("Bobby", profile.Username, "Invalid Username");
             });
+        }
+
+        [Test]
+        public async Task GetUserProfile_NotAuthenticated()
+        {
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"sub\": \"248289761001\",\"name\": \"Bob Smith\",\"preferred_username\": \"Bobby\",\"given_name\": \"Bob\",\"family_name\": \"Smith\",\"role\": [\"user\",\"admin\"]}"),
+                });
+
+            IAuthentication auth = new BaseOAuthAuthenticationStub(handlerMock.Object);
+            Assert.ThrowsAsync<NotAuthenticatedException>(async () =>
+            {
+                User u = await auth.GetUserProfile();
+            });
+            handlerMock.VerifyNoOtherCalls();
         }
     }
 }

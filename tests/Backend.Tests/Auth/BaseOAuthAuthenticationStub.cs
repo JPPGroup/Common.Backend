@@ -7,7 +7,7 @@ namespace Jpp.Common.Backend.UnitTests.Auth
 {
     class BaseOAuthAuthenticationStub : BaseOAuthAuthentication
     {
-        public BaseOAuthAuthenticationStub(HttpMessageHandler handler) : base(handler)
+        public BaseOAuthAuthenticationStub(HttpMessageHandler handler) : base(null, handler)
         {
 
         }
