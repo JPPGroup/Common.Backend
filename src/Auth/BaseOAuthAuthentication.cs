@@ -9,8 +9,8 @@ namespace Jpp.Common.Backend.Auth
 {
     public abstract class BaseOAuthAuthentication : IAuthentication
     {
-        internal ErrorHandler _errorHandler;
-        protected IMessageProvider _messenger;
+        internal HttpMessageHandler _messageHandler;
+        protected IMessageProvider Messenger { get; private set; }
 
         public bool Authenticated { get; set; } = false;
         public event EventHandler AuthenticationChanged;
@@ -22,10 +22,14 @@ namespace Jpp.Common.Backend.Auth
 
         public abstract Task Expire();
 
-        protected BaseOAuthAuthentication(IMessageProvider messenger)
+        protected BaseOAuthAuthentication(IMessageProvider messenger) : this(messenger, new ErrorHandler(messenger))
         {
-            _messenger = messenger;
-            _errorHandler = new ErrorHandler(messenger);
+        }
+
+        internal BaseOAuthAuthentication(IMessageProvider messenger, HttpMessageHandler handler)
+        {            
+            _messageHandler = handler;
+            Messenger = messenger;
         }
 
         public HttpClient GetAuthenticatedClient()
@@ -35,7 +39,7 @@ namespace Jpp.Common.Backend.Auth
 
             if (_client == null)
             {
-                _client = new HttpClient(_errorHandler);
+                _client = new HttpClient(_messageHandler);
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             }
 

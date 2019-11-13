@@ -64,7 +64,7 @@ namespace Jpp.Common.Backend.Auth
                 }
                 catch (Exception e)
                 {
-                    await _messenger.ShowCriticalError("Unable to communicate with server. Please try again later.");
+                    await Messenger.ShowCriticalError("Unable to communicate with server. Please try again later.");
                     //TODO: Log this.
                 }
             }
